@@ -1,0 +1,229 @@
+;nasm 2.11.08
+
+section .bss
+   var1 resb 2
+   opp resb 2
+   var2 resb 2
+   period resb 2;2
+   answer resb 1;2
+  
+  section .data 
+  msg db "= ", 
+  len equ $- msg
+  
+  skp db " ", 0xA
+  len3 equ $- msg
+ 
+
+section .text
+	global _start
+_start:
+  
+  next:
+  
+  mov eax, 4
+  mov ebx, 1
+  mov ecx, skp
+  mov edx, 2
+  int 0x80
+  
+  mov eax, 3; gets the first variable 
+  mov ebx, 0
+  mov ecx, var1
+  mov edx, 2
+  int 0x80
+  
+  mov eax, [var1]
+  cmp al, '.'
+  je per
+  
+  mov eax, 3; gets the opperator
+  mov ebx, 0
+  mov ecx, opp
+  mov edx, 2
+  int 0x80
+  
+  mov eax, 3 ; gets the second variable
+  mov ebx, 0
+  mov ecx, var2
+  mov edx, 2
+  int 0x80
+ 
+  mov eax, 3 ; gets the period at the end if it is there if no thtere is a space
+  mov ebx, 0
+  mov ecx, period
+  mov edx, 1
+  int 0x80
+  
+  ;/////////////////////////////////////////////////////////
+  
+  mov eax, 4; prints first varible for output
+  mov ebx, 1
+  mov ecx, var1
+  mov edx, 2
+  int 0x80
+  
+  mov eax, 4; prints operator for output
+  mov ebx, 1
+  mov ecx, opp
+  mov edx, 2
+  int 0x80
+  
+  mov eax, 4 ; prints second varible for output
+  mov ebx, 1
+  mov ecx, var2
+  mov edx, 2
+  int 0x80
+  
+  
+  ;//////////////////////////////////////////////////////////
+  mov eax, [opp] ; puts the opperator into eax tocheck what it is 
+  
+  cmp al, '+' ; if + jump to add
+  je add_n
+  
+  cmp al, '-' ; if - jump to subtract
+  je sub_n
+  
+  cmp al, '*' ; if * jump to multiply
+  je mult
+  
+  cmp al, '/' ; if / jump to divide
+  je divi
+  
+  per: ; if there is a period jump to the end
+  jmp end
+  
+  add_n: ; calls add function
+  call add_num
+  
+  sub_n: ; calls ssubtract function
+  call sub_num
+  
+  mult: ; calls multiply function
+  call mult_num
+  
+  divi: ; calls divide function
+  call divi_num
+  
+  ;//////////////////////////////////////////////////////////////////
+  add_num:
+  mov al, [var1] ; gets first var and puts it into decimal to preform operation
+  sub al, '0'
+  
+  mov bl, [var2]; gets second var and puts it into decimal to preform operation
+  sub bl, '0'
+  
+  add al, bl ; preforms opperation
+  add al, '0' ; puts it back into ascii
+  mov [answer], al; places it into answer
+  
+  mov eax, 4 ; prints the equal sign
+  mov ebx, 1
+  mov ecx, msg
+  mov edx, len
+  int 0x80
+  
+  mov eax, 4 ; prints the answer
+  mov ebx, 1
+  mov ecx, answer
+  mov edx, 1
+  int 0x80
+  
+  
+  mov al, 0
+  
+  ;/////////////TESTING
+  
+  
+  
+
+  
+  ;////////END TESTING
+
+  jmp next
+  ;///////////////////////////////////////
+  
+  sub_num:
+  mov al, [var1]; gets first var and puts it into decimal to preform operation
+  sub al, '0'
+  
+  mov bl, [var2]; gets second var and puts it into decimal to preform operation
+  sub bl, '0'
+  
+  sub al, bl; preforms opperation; preforms opperation
+  add al, '0'; puts it back into ascii; puts it back into ascii
+  mov [answer], al; places it into answer
+  
+  mov eax, 4 ; prints the equal sign
+  mov ebx, 1
+  mov ecx, msg
+  mov edx, len
+  int 0x80
+  
+  mov eax, 4 ; prints the answer
+  mov ebx, 1
+  mov ecx, answer
+  mov edx, 1
+  int 0x80
+  
+  jmp next
+  ;///////////////////////////////////////
+  
+  mult_num:
+  mov al, [var1]; gets first var and puts it into decimal to preform operation
+  sub al, '0'
+  
+  mov bl, [var2]; gets second var and puts it into decimal to preform operation
+  sub bl, '0'
+  
+  mul bl; preforms opperation
+  add al, '0'; puts it back into ascii
+  mov [answer], al; places it into answer
+  
+  mov eax, 4 ; prints the equal sign ; prints the equal sign
+  mov ebx, 1
+  mov ecx, msg
+  mov edx, len
+  int 0x80
+  
+  mov eax, 4 ; prints the answer
+  mov ebx, 1
+  mov ecx, answer
+  mov edx, 1
+  int 0x80
+  
+  jmp next
+  ;///////////////////////////////////////
+  ;DIVIDE
+  divi_num:
+  
+  mov ax, [var1]; gets first var and puts it into decimal to preform operation
+  sub ax, '0'
+  
+  mov bx, [var2]; gets second var and puts it into decimal to preform operation
+  sub bl, '0'
+  
+  div bx; preforms opperation
+  add bx, '0'; puts it back into ascii
+  mov [answer], bx; places it into answer
+  
+  mov eax, 4 ; prints the equal sign
+  mov ebx, 1
+  mov ecx, msg
+  mov edx, len
+  int 0x80
+  
+  mov eax, 4 ; prints the answer
+  mov ebx, 1
+  mov ecx, answer
+  mov edx, 2
+  int 0x80
+  
+  jmp next
+  ;///////////////////////////////////////////////////
+  
+end:
+	mov eax,1            ; The system call for exit (sys_exit)
+	mov ebx,0            ; Exit with return code of 0 (no error)
+	int 80h;
